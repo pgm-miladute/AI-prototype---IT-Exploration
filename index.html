@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yoga Pose imitate</title>
+    <style>
+        .pose-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .pose-image {
+            width: 150px;
+            height: auto;
+        }
+
+        .pose-description {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to Yoga Pose imitate</h1>
+    <p>Teachable machine </p>
+
+    <div class="pose-container">
+        <div>
+            <img class="pose-image" src="img/Cat Pose.png" alt="Yoga Pose 1">
+            <p class="pose-description">Cat Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/bridge pose.png" alt="Yoga Pose 2">
+            <p class="pose-description">Bridge Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/Bow Pose.png" alt="Yoga Pose 3">
+            <p class="pose-description">Bow Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/child pose.png" alt="Yoga Pose 3">
+            <p class="pose-description">Child Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/cobra pose.png" alt="Yoga Pose 3">
+            <p class="pose-description">Cobra Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/dancer pose.png" alt="Yoga Pose 1">
+            <p class="pose-description">Dancer Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/Dolphin Pose.png" alt="Yoga Pose 2">
+            <p class="pose-description">Dolphin Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/downward facing dog.png" alt="Yoga Pose 2">
+            <p class="pose-description">Downward facing dog</p>
+        </div>
+    </div>
+
+    <div class="pose-container">
+        <div>
+            <img class="pose-image" src="img/extended hand to big toe pose.png" alt="Yoga Pose 1">
+            <p class="pose-description"> Extended hand to big toe Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/Extended Side Angle Pose.png" alt="Yoga Pose 2">
+            <p class="pose-description">Extended Side Angle Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/gate pose.png" alt="Yoga Pose 3">
+            <p class="pose-description"> Gate Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/Revolved hand to big toe Pose.png" alt="Yoga Pose 3">
+            <p class="pose-description">Revolved hand to big toe Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/standing pose.png" alt="Yoga Pose 3">
+            <p class="pose-description">Extended Standing Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/Triangle.png" alt="Yoga Pose 1">
+            <p class="pose-description">Triangle Pose</p>
+        </div>
+        <div>
+            <img class="pose-image" src="img/upward facing dog.png" alt="Yoga Pose 2">
+            <p class="pose-description">Pigeon Pose</p>
+        </div>
+    </div>
+
+
+    <div>Teachable Machine Image Model</div>
+    <button type="button" onclick="init()">Start</button>
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        // the link to your model provided by Teachable Machine export panel
+        const URL = "https://teachablemachine.withgoogle.com/models/sPLs2NPLT/";
+
+        let model, webcam, labelContainer, maxPredictions;
+
+        // Load the image model and setup the webcam
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            // load the model and metadata
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            // Setup webcam
+            const flip = true; // whether to flip the webcam
+            webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+            await webcam.setup(); // request access to the webcam
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            // append webcam to DOM
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+        }
+
+        async function loop() {
+            webcam.update(); // update the webcam frame
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        // run the webcam image through the image model
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+
+            let highestProbability = 0;
+            let predictedClass = '';
+
+            for (let i = 0; i < maxPredictions; i++) {
+                if (prediction[i].probability > highestProbability) {
+                    highestProbability = prediction[i].probability;
+                    predictedClass = prediction[i].className;
+                }
+            }
+
+            const resultText = `Predicted Pose: ${predictedClass}, Confidence: ${(highestProbability * 100).toFixed(2)}%`;
+            labelContainer.innerHTML = resultText;
+        }
+    </script>
+
+</body>
+
+</html>
